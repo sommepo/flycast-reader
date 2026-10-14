@@ -19,6 +19,9 @@
     along with Flycast.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "vulkan_context.h"
+// Reader fork
+#include "reader/core/crt.h"
+#include "reader/render/crt_vk.h"
 #include "vulkan_renderer.h"
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"
@@ -644,6 +647,11 @@ bool VulkanContext::InitDevice()
 	    quadDrawer = std::make_unique<QuadDrawer>();
 	    quadRotatePipeline = std::make_unique<QuadPipeline>(true, true);
 	    quadRotateDrawer = std::make_unique<QuadDrawer>();
+	    // Reader fork
+	    readerCrtPipeline = std::make_unique<QuadPipeline>(true, false, true);
+	    readerCrtRotatePipeline = std::make_unique<QuadPipeline>(true, true, true);
+	    readerCrtDrawer = std::make_unique<QuadDrawer>();
+	    readerCrtRotateDrawer = std::make_unique<QuadDrawer>();
 
 		vk::PhysicalDeviceProperties props = physicalDevice.getProperties();
 		driverName = (const char *)props.deviceName;
@@ -894,6 +902,11 @@ void VulkanContext::CreateSwapChain()
 	    quadDrawer->Init(quadPipeline.get());
 	    quadRotatePipeline->Init(shaderManager.get(), *renderPass, 0);
 	    quadRotateDrawer->Init(quadRotatePipeline.get());
+	    // Reader fork
+	    readerCrtPipeline->Init(shaderManager.get(), *renderPass, 0);
+	    readerCrtDrawer->Init(readerCrtPipeline.get());
+	    readerCrtRotatePipeline->Init(shaderManager.get(), *renderPass, 0);
+	    readerCrtRotateDrawer->Init(readerCrtRotatePipeline.get());
 	    overlay->Init(quadPipelineWithAlpha.get());
 
 	    InitImgui();
@@ -1120,6 +1133,11 @@ void VulkanContext::DrawFrame(vk::ImageView imageView, const vk::Extent2D& exten
 	static const float scopeColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	CommandBufferDebugScope _(commandBuffer, "DrawFrame", scopeColor);
 
+	// Reader fork: the frame through the reader's CRT shader when that is on
+	const bool readerCrt = Reader::Crt::Enabled();
+	if (readerCrt)
+		(config::Rotate90 ? readerCrtRotatePipeline : readerCrtPipeline)->BindPipeline(commandBuffer);
+	else
 	if (config::Rotate90)
 		quadRotatePipeline->BindPipeline(commandBuffer);
 	else
@@ -1132,6 +1150,18 @@ void VulkanContext::DrawFrame(vk::ImageView imageView, const vk::Extent2D& exten
 	vk::Viewport viewport(dx, dy, width - dx * 2, height - dy * 2);
 	commandBuffer.setViewport(0, viewport);
 	commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(dx, dy), vk::Extent2D(width - dx * 2, height - dy * 2)));
+	if (readerCrt)
+	{
+		ReaderCrtQuad readerQuad { (int)extent.width, (int)extent.height, (int)(width - dx * 2), (int)(height - dy * 2) };
+		if (config::Rotate90) {
+			std::swap(readerQuad.sourceWidth, readerQuad.sourceHeight);
+			std::swap(readerQuad.outputWidth, readerQuad.outputHeight);
+		}
+		float constants[32];
+		readerCrtVkConstants(readerQuad, constants);
+		(config::Rotate90 ? readerCrtRotateDrawer : readerCrtDrawer)->Draw(commandBuffer, imageView, vtx, false, nullptr, constants);
+	}
+	else
 	if (config::Rotate90)
 		quadRotateDrawer->Draw(commandBuffer, imageView, vtx, !config::LinearInterpolation);
 	else
@@ -1256,6 +1286,12 @@ void VulkanContext::term()
 	quadPipelineWithAlpha.reset();
 	quadRotateDrawer.reset();
 	quadRotatePipeline.reset();
+	// Reader fork
+	readerCrtDrawer.reset();
+	readerCrtRotateDrawer.reset();
+	readerCrtPipeline.reset();
+	readerCrtRotatePipeline.reset();
+	readerCrtVkTerm();
 	shaderManager.reset();
 	descriptorPool.reset();
 	commandBuffers.clear();

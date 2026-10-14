@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with Flycast.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "reader/core/emulator.h" // Reader fork
 #include "emulator.h"
 #include "types.h"
 #include "stdclass.h"
@@ -500,6 +501,8 @@ static void setPlatform(int platform)
 
 void Emulator::init()
 {
+	// Reader fork: the text engine hears of games, frames and savestates from here on.
+	Reader::Emu::Install();
 	if (state != Uninitialized)
 	{
 		verify(state == Init);

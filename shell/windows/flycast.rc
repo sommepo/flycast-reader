@@ -10,7 +10,8 @@
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "flycast.ico"
+// Reader fork: the app's own icon (reader/icon).
+IDI_ICON1               ICON                    "../../reader/icon/app.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 

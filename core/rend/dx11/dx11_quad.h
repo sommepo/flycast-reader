@@ -19,6 +19,7 @@
 #pragma once
 #include <d3d11.h>
 #include "dx11_shaders.h"
+#include "reader/render/crt_dx11.h" // Reader fork
 
 class Quad
 {
@@ -84,8 +85,10 @@ public:
 		}
 	}
 
+	// Reader fork: `crt`, when given, is the finished frame going to the screen, which the
+	// reader's CRT shader then draws.
 	void draw(ComPtr<ID3D11ShaderResourceView>& texView, ComPtr<ID3D11SamplerState> sampler, const float *color = nullptr,
-			float x = -1.f, float y = -1.f, float w = 2.f, float h = 2.f, bool rotate = false)
+			float x = -1.f, float y = -1.f, float w = 2.f, float h = 2.f, bool rotate = false, const ReaderCrtQuad *crt = nullptr)
 	{
 		// Vertex buffer
 		Vertex vertices[4] {
@@ -122,6 +125,8 @@ public:
 		memcpy(mappedSubres.pData, color, sizeof(float) * 4);
 		deviceContext->Unmap(constantBuffer, 0);
 		deviceContext->PSSetConstantBuffers(0, 1, &constantBuffer.get());
+		if (crt != nullptr)
+			readerCrtDx11Use(device, deviceContext, shaders, *crt); // Reader fork
 
 		// Bind texture and draw
         deviceContext->PSSetShaderResources(0, 1, &texView.get());

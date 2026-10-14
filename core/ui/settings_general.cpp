@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with Flycast.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "reader/ui/dc_home.h" // Reader fork
 #include "settings.h"
 #include "gui.h"
 #include "IconsFontAwesome6.h"
@@ -376,6 +377,16 @@ void gui_settings_general()
 			mainui_reinit();
 			uiUserScaleUpdated = false;
 		}
+	}
+
+	// Reader fork: the Dreamcast-style menu and its colours, on unless switched off here.
+	{
+		bool menu = ReaderHome::Enabled();
+		if (ImGui::Checkbox("Dreamcast menu as the main screen", &menu))
+			ReaderHome::SetEnabled(menu);
+		bool look = ReaderHome::LookEnabled();
+		if (ImGui::Checkbox("Dreamcast colours in every screen (instead of the theme below)", &look))
+			ReaderHome::SetLookEnabled(look);
 	}
 
 	const char *themes[] = { T("Dark"), T("Light"), T("Dreamcast"), T("High Contrast"), T("Nintendo"), T("Aqua Chill") };
@@ -875,6 +886,9 @@ static void applySoftTheme()
 // Add the common function before gui_initFonts
 void applyCurrentTheme()
 {
+	// Reader fork: the console's own colours, unless they were switched off.
+	if (ReaderHome::ApplyTheme())
+		return;
 	if (config::UITheme == 0)
 		applyDarkTheme();
 	else if (config::UITheme == 1)

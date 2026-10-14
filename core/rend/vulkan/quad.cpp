@@ -20,6 +20,7 @@
 */
 #include "quad.h"
 #include "vulkan_context.h"
+#include "reader/render/crt_vk.h" // Reader fork
 
 #include <memory>
 
@@ -106,7 +107,8 @@ void QuadPipeline::CreatePipeline()
 
 	std::array<vk::PipelineShaderStageCreateInfo, 2> stages = {
 			vk::PipelineShaderStageCreateInfo(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eVertex, shaderManager->GetQuadVertexShader(rotate), "main"),
-			vk::PipelineShaderStageCreateInfo(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eFragment, shaderManager->GetQuadFragmentShader(ignoreTexAlpha), "main"),
+			vk::PipelineShaderStageCreateInfo(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eFragment,
+					readerCrt ? readerCrtVkShader() : shaderManager->GetQuadFragmentShader(ignoreTexAlpha), "main"), // Reader fork: its own shader
 	};
 	vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo
 	(
@@ -137,7 +139,8 @@ void QuadPipeline::Init(ShaderManager *shaderManager, vk::RenderPass renderPass,
 		vk::DescriptorSetLayoutBinding binding(0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment); // texture
 		descSetLayout = GetContext()->GetDevice().createDescriptorSetLayoutUnique(
 				vk::DescriptorSetLayoutCreateInfo(vk::DescriptorSetLayoutCreateFlags(), binding));
-		vk::PushConstantRange pushConstant(vk::ShaderStageFlagBits::eFragment, 0, 4 * sizeof(float));
+		// Reader fork: the CRT shader's constants are 32 numbers
+		vk::PushConstantRange pushConstant(vk::ShaderStageFlagBits::eFragment, 0, (readerCrt ? 32 : 4) * sizeof(float));
 		pipelineLayout = GetContext()->GetDevice().createPipelineLayoutUnique(
 				vk::PipelineLayoutCreateInfo(vk::PipelineLayoutCreateFlags(), descSetLayout.get(), pushConstant));
 	}
@@ -182,7 +185,8 @@ void QuadDrawer::Init(QuadPipeline *pipeline)
 		descSet.reset();
 }
 
-void QuadDrawer::Draw(vk::CommandBuffer commandBuffer, vk::ImageView imageView, QuadVertex vertices[4], bool nearestFilter, const float *color)
+void QuadDrawer::Draw(vk::CommandBuffer commandBuffer, vk::ImageView imageView, QuadVertex vertices[4], bool nearestFilter, const float *color,
+		const float *readerCrt)
 {
 	VulkanContext *context = GetContext();
 	const unsigned imageIndex = context->GetCurrentImageIndex();
@@ -211,6 +215,9 @@ void QuadDrawer::Draw(vk::CommandBuffer commandBuffer, vk::ImageView imageView, 
 		static float fullWhite[] { 1.f, 1.f, 1.f, 1.f };
 		color = fullWhite;
 	}
+	if (readerCrt != nullptr) // Reader fork
+		commandBuffer.pushConstants(pipeline->GetPipelineLayout(), vk::ShaderStageFlagBits::eFragment, 0, sizeof(float) * 32, readerCrt);
+	else
 	commandBuffer.pushConstants(pipeline->GetPipelineLayout(), vk::ShaderStageFlagBits::eFragment, 0, sizeof(float) * 4, color);
 	buffer->Draw(commandBuffer);
 }

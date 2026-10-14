@@ -26,7 +26,10 @@ public:
 	~GlQuadDrawer();
 
 	// coords is an optional array of 20 floats (4 vertices with x,y,z,u,v each)
-	void draw(GLuint texId, bool rotate = false, bool swapY = false, const float *coords = nullptr, const float *color = nullptr);
+	// Reader fork: `crt`, when given, is the finished frame going to the screen, which the
+	// reader's CRT shader then draws (reader/render/crt_gl.h).
+	void draw(GLuint texId, bool rotate = false, bool swapY = false, const float *coords = nullptr, const float *color = nullptr,
+			const struct ReaderCrtQuad *crt = nullptr);
 
 private:
 	class VertexArray final : public GlVertexArray

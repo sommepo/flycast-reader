@@ -272,6 +272,11 @@ private:
 	std::unique_ptr<QuadPipeline> quadRotatePipeline;
 	std::unique_ptr<QuadDrawer> quadDrawer;
 	std::unique_ptr<QuadDrawer> quadRotateDrawer;
+	// Reader fork: the finished frame through the reader's CRT shader
+	std::unique_ptr<QuadPipeline> readerCrtPipeline;
+	std::unique_ptr<QuadPipeline> readerCrtRotatePipeline;
+	std::unique_ptr<QuadDrawer> readerCrtDrawer;
+	std::unique_ptr<QuadDrawer> readerCrtRotateDrawer;
 	std::unique_ptr<ShaderManager> shaderManager;
 
 	vk::ImageView lastFrameView;

@@ -17,6 +17,7 @@
     along with Flycast.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "quad.h"
+#include "reader/render/crt_gl.h" // Reader fork
 
 static const char* VertexShader = R"(
 in highp vec3 in_pos;
@@ -107,20 +108,24 @@ GlQuadDrawer::~GlQuadDrawer()
 	quadVertexArraySwapY.term();
 	quadVertexArrayCustom.term();
 
+	readerCrtGlTerm(); // Reader fork
 	glcache.DeleteProgram(shader);
 	shader = 0;
 	glcache.DeleteProgram(rot90shader);
 	rot90shader = 0;
 }
 
-void GlQuadDrawer::draw(GLuint texId, bool rotate, bool swapY, const float *coords, const float *color)
+void GlQuadDrawer::draw(GLuint texId, bool rotate, bool swapY, const float *coords, const float *color, const ReaderCrtQuad *crt)
 {
 	glcache.Disable(GL_SCISSOR_TEST);
 	glcache.Disable(GL_DEPTH_TEST);
 	glcache.Disable(GL_STENCIL_TEST);
 	glcache.Disable(GL_CULL_FACE);
 
-	glcache.UseProgram(rotate ? rot90shader : shader);
+	// Reader fork: the reader's CRT program in place of the plain one, when it is on
+	const bool readerCrt = crt != nullptr && readerCrtGlUse(rotate, *crt);
+	if (!readerCrt)
+		glcache.UseProgram(rotate ? rot90shader : shader);
 
 	glActiveTexture(GL_TEXTURE0);
 	glcache.BindTexture(GL_TEXTURE_2D, texId);
@@ -129,7 +134,8 @@ void GlQuadDrawer::draw(GLuint texId, bool rotate, bool swapY, const float *coor
 		static constexpr float white[4] { 1.f, 1.f, 1.f, 1.f };
 		color = white;
 	}
-	glUniform4fv(rotate ? rot90TintUniform : tintUniform, 1, color);
+	if (!readerCrt)
+		glUniform4fv(rotate ? rot90TintUniform : tintUniform, 1, color);
 
 	if (coords == nullptr)
 	{

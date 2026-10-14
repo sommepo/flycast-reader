@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with Flycast.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "reader/core/emulator.h" // Reader fork
 #include "oslib.h"
 #include "stdclass.h"
 #include "cfg/cfg.h"
@@ -61,6 +62,11 @@ std::string getVmuPath(const std::string& port, bool save)
 				if (INVALID_CHARS.find(c) != INVALID_CHARS.npos)
 					c = '_';
 			vmuName += "_vmu_save_A1.bin";
+			// Reader fork: a game's own memory unit lives in a folder of its own
+			// (saves/<product number>), which is what save sync sends to other devices.
+			const std::string folder = Reader::Emu::SaveFolderOf(settings.content.gameId);
+			if (!folder.empty() && config::VMUPath.get().empty())
+				return folder + "/vmu_save_A1.bin";
 		}
 		else if (!settings.content.path.empty())
 		{

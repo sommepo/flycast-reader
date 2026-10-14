@@ -1,4 +1,5 @@
 #ifndef LIBRETRO
+#include "reader/core/emulator.h" // Reader fork
 #include "types.h"
 #include "emulator.h"
 #include "hw/mem/addrspace.h"
@@ -102,6 +103,8 @@ int flycast_init(int argc, char* argv[])
 		}
 		i18n::reloadLanguage();
 		gui_init();
+		// Reader fork: the reading layer and save sync begin with the app.
+		Reader::Emu::Install();
 		os_CreateWindow();
 		os_SetupInput();
 

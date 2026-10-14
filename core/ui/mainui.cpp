@@ -17,6 +17,9 @@
     along with Flycast.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifdef READER_QT
+#include "reader/qt/install.h" // Reader fork
+#endif
 #include "mainui.h"
 #include "hw/pvr/Renderer_if.h"
 #include "gui.h"
@@ -41,6 +44,10 @@ bool mainui_rend_frame()
 
 	os_DoEvents();
 	os_UpdateInputState();
+#ifdef READER_QT
+	// Reader fork: the reader's windows are another toolkit's, whose events are handled here.
+	ReaderUi::Pump();
+#endif
 
 	if (gui_is_open())
 	{
@@ -93,9 +100,31 @@ void mainui_term()
 	rend_term_renderer();
 }
 
+#ifdef READER_QT
+// Reader fork: one frame of this window while one of the reader's own windows has the say.
+static void readerIdleFrame()
+{
+	try {
+		if (mainui_rend_frame() && imguiDriver != nullptr) {
+			ReaderUi::FrameDrawn();
+			imguiDriver->present();
+		}
+	} catch (const FlycastException& e) {
+	}
+}
+#endif
+
 void mainui_loop(bool forceStart)
 {
+#ifndef READER_QT
+	// Reader fork: on the desktop this is the program's main thread, and its name is the
+	// program's name to the system: scripts that look for the program by its file's name
+	// (a launcher that ends it, say) would not find it under another.
 	ThreadName _("Flycast-rend");
+#endif
+#ifdef READER_QT
+	ReaderUi::SetIdleFrame(readerIdleFrame); // Reader fork
+#endif
 	if (forceStart)
 		mainui_enabled = true;
 	mainui_init();
@@ -108,6 +137,9 @@ void mainui_loop(bool forceStart)
 		if (mainui_rend_frame() && imguiDriver != nullptr)
 		{
 			try {
+#ifdef READER_QT
+				ReaderUi::FrameDrawn(); // Reader fork
+#endif
 				imguiDriver->present();
 			} catch (const FlycastException& e) {
 				forceReinit = true;

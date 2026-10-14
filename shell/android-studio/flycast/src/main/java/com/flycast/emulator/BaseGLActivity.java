@@ -212,6 +212,7 @@ public abstract class BaseGLActivity extends Activity implements ActivityCompat.
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        com.flycast.emulator.reader.ReaderGlue.onDestroy(this);  // Reader fork
         paused = true;
         InputDeviceManager.getInstance().stopListening();
         register(null);
@@ -224,6 +225,7 @@ public abstract class BaseGLActivity extends Activity implements ActivityCompat.
     @Override
     protected void onPause() {
         super.onPause();
+        com.flycast.emulator.reader.ReaderGlue.onPause();  // Reader fork
         resumedCalled = false;
         handleStateChange(true);
     }
@@ -231,6 +233,7 @@ public abstract class BaseGLActivity extends Activity implements ActivityCompat.
     @Override
     protected void onResume() {
         super.onResume();
+        com.flycast.emulator.reader.ReaderGlue.onResume();  // Reader fork
         resumedCalled = true;
         handleStateChange(false);
     }
@@ -283,6 +286,9 @@ public abstract class BaseGLActivity extends Activity implements ActivityCompat.
     }
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
+        // Reader fork: while the reader's cursor has the sticks, the game does not.
+        if (com.flycast.emulator.reader.ReaderGlue.onMotion(event))
+            return true;
         InputDeviceManager deviceManager = InputDeviceManager.getInstance();
         if ((event.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK) == InputDevice.SOURCE_CLASS_JOYSTICK
                 && event.getAction() == MotionEvent.ACTION_MOVE
@@ -347,6 +353,9 @@ public abstract class BaseGLActivity extends Activity implements ActivityCompat.
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        // Reader fork: the reader's own buttons (its cursor, its statistics) do not reach the game.
+        if (com.flycast.emulator.reader.ReaderGlue.onKey(event))
+            return true;
         if (InputDeviceManager.getInstance().buttonEvent(event.getDeviceId(), keyCode, false))
             return true;
         if (hasKeyboard && InputDeviceManager.getInstance().keyboardEvent(keyCode, false))
@@ -356,6 +365,8 @@ public abstract class BaseGLActivity extends Activity implements ActivityCompat.
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (com.flycast.emulator.reader.ReaderGlue.onKey(event))  // Reader fork
+            return true;
         if (event.getRepeatCount() == 0) {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 if (JNIdc.guiIsContentBrowser()) {

@@ -41,7 +41,8 @@ void os_DoEvents()
 void common_linux_setup();
 
 // Find the user config directory.
-// $HOME/.config/flycast on linux
+// $HOME/.config/flycast-reader on linux (Reader fork: folders of its own, so that a
+// Flycast on the same computer is never touched)
 static std::string find_user_config_dir()
 {
 	std::string xdg_home;
@@ -57,7 +58,7 @@ static std::string find_user_config_dir()
 
 	if (!xdg_home.empty())
 	{
-		std::string fullpath = xdg_home + "/flycast/";
+		std::string fullpath = xdg_home + "/flycast-reader/";
 		struct stat info;
 		if (flycast::stat(fullpath.c_str(), &info) != 0 || (info.st_mode & S_IFDIR) == 0)
 			// Create .config/flycast
@@ -86,7 +87,7 @@ static std::string find_user_data_dir()
 
 	if (!xdg_home.empty())
 	{
-		std::string fullpath = xdg_home + "/flycast/";
+		std::string fullpath = xdg_home + "/flycast-reader/";
 		struct stat info;
 		if (flycast::stat(fullpath.c_str(), &info) != 0 || (info.st_mode & S_IFDIR) == 0)
 			// Create .local/share/flycast
@@ -135,7 +136,7 @@ static std::vector<std::string> find_system_config_dirs()
 		xdg_home = (std::string)nowide::getenv("HOME") + "/.config";
 	if (!xdg_home.empty())
 		// XDG config locations
-		dirs.push_back(xdg_home + "/flycast/");
+		dirs.push_back(xdg_home + "/flycast-reader/");
 
 	if (nowide::getenv("XDG_CONFIG_DIRS") != nullptr)
 	{
@@ -179,7 +180,7 @@ static std::vector<std::string> find_system_data_dirs()
 		xdg_home = (std::string)nowide::getenv("HOME") + "/.local/share";
 	if (!xdg_home.empty())
 		// XDG data locations
-		dirs.push_back(xdg_home + "/flycast/");
+		dirs.push_back(xdg_home + "/flycast-reader/");
 
 	if (nowide::getenv("XDG_DATA_DIRS") != nullptr)
 	{

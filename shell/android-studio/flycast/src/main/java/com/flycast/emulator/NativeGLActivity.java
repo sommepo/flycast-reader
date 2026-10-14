@@ -39,6 +39,8 @@ public final class NativeGLActivity extends BaseGLActivity {
         mLayout.addView(mView);
 
         setContentView(mLayout);
+        // Reader fork: the reading layer lies over the surface.
+        com.flycast.emulator.reader.ReaderGlue.attach(this, mView);
         Log.i("flycast", "NativeGLActivity.onCreate done");
     }
 

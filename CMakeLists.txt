@@ -1453,7 +1453,10 @@ if(NOT LIBRETRO)
 			endif()
 			set_target_properties(${PROJECT_NAME} PROPERTIES RESOURCE "${ResourceFiles}")
 		else()
-			if(NOT BUILD_TESTING AND ("x86" IN_LIST ARCHITECTURE OR "x86_64" IN_LIST ARCHITECTURE))
+			# Reader fork: the library that hands the picture to other programs spells its own
+			# files in ways only Windows forgives; the build made on Linux leaves it out
+			# (READER_NO_VIDEO_ROUTING).
+			if(NOT BUILD_TESTING AND NOT READER_NO_VIDEO_ROUTING AND ("x86" IN_LIST ARCHITECTURE OR "x86_64" IN_LIST ARCHITECTURE))
 				target_include_directories(${PROJECT_NAME} PRIVATE core/deps/Spout/SPOUTSDK/SpoutGL)
 				target_include_directories(${PROJECT_NAME} PRIVATE core/deps/Spout/SPOUTSDK/SpoutDirectX/SpoutDX)
 				SET(SPOUT_BUILD_CMT OFF CACHE BOOL "For Visual Studio - build /MT to link runtime libraries" FORCE)
@@ -1530,4 +1533,15 @@ endif()
 if(${CMAKE_GENERATOR} MATCHES "^Xcode.*|^Visual Studio.*")
 	file(GLOB_RECURSE SRC_FILES *.h *.cpp *.c *.cc *.mm)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_FILES})
+endif()
+
+# Reader fork: the reading layer (text engine, dictionaries, cards, statistics, save sync).
+# A published build (READER_SAVE_SYNC=OFF) has no save sync: no page for it, nothing started,
+# every memory unit where Flycast keeps it.
+option(READER_SAVE_SYNC "Save sync (a service of one's own keeps each game's saves)" ON)
+if(NOT LIBRETRO)
+	if(NOT READER_SAVE_SYNC)
+		target_compile_definitions(${PROJECT_NAME} PRIVATE READER_NO_SAVE_SYNC)
+	endif()
+	add_subdirectory(reader)
 endif()

@@ -17,6 +17,7 @@
     along with Flycast.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "dx11_renderer.h"
+#include "reader/core/crt.h" // Reader fork
 #include "dx11context.h"
 #include "hw/pvr/ta.h"
 #include "hw/pvr/pvr_mem.h"
@@ -173,6 +174,7 @@ bool DX11Renderer::Init()
 void DX11Renderer::Term()
 {
 	NOTICE_LOG(RENDERER, "DX11 renderer terminating");
+	readerCrtDx11Term(); // Reader fork
 #ifdef VIDEO_ROUTING
 	os_VideoRoutingTermDX();
 #endif
@@ -572,6 +574,10 @@ void DX11Renderer::displayFramebuffer()
 	float y = (float)dy;
 	float w = (float)(outwidth - 2 * dx);
 	float h = (float)(outheight - 2 * dy);
+	// Reader fork: the frame through the reader's CRT shader when that is on (it wants the
+	// frame smoothed)
+	const bool readerCrt = Reader::Crt::Enabled();
+	const ReaderCrtQuad readerQuad { (int)width, (int)height, (int)w, (int)h };
 
 	// Normalize
 	x = x * 2.f / outwidth - 1.f;
@@ -582,7 +588,8 @@ void DX11Renderer::displayFramebuffer()
 	x += shiftX;
 	y += shiftY;
 	deviceContext->OMSetBlendState(blendStates.getState(false), nullptr, 0xffffffff);
-	quad->draw(fbTextureView, samplers->getSampler(config::LinearInterpolation), nullptr, x, y, w, h, config::Rotate90);
+	quad->draw(fbTextureView, samplers->getSampler(config::LinearInterpolation || readerCrt), nullptr, x, y, w, h, config::Rotate90,
+			readerCrt ? &readerQuad : nullptr);
 #endif
 }
 

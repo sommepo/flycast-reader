@@ -1,3 +1,4 @@
+#include "reader/core/emulator.h" // Reader fork
 #include "maple_devs.h"
 #include "maple_cfg.h"
 #include "maple_helper.h"
@@ -433,6 +434,8 @@ struct maple_sega_vmu: maple_base
 		memset(flash_data, 0, sizeof(flash_data));
 		memset(lcd_data, 0, sizeof(lcd_data));
 
+        // Reader fork: another device's newer save takes the file's place first.
+        Reader::Emu::BeforeMemoryUnit(logical_port);
         // Load existing vmu file if found
         std::string rpath = hostfs::getVmuPath(logical_port, false);
         // this might be a storage url
@@ -709,6 +712,10 @@ struct maple_sega_vmu: maple_base
 								ERROR_LOG(MAPLE, "Failed to save VMU %s: I/O error", logical_port);
 								return MDRE_FileError; // I/O error
 							}
+							// Reader fork: what was written reaches the file now, and save sync
+							// hears of it.
+							std::fflush(file);
+							Reader::Emu::OnSaveWritten(logical_port);
 						}
 						return MDRS_DeviceReply;
 					}

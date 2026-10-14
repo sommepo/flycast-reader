@@ -20,3 +20,15 @@ core/deps/glslang/
 .cache/
 compile_commands.json
 CMakeUserPresets.json
+
+# Reader fork
+/private/
+/build-host/
+/build-desktop/
+/build-windows/
+/build-windows-public/
+__pycache__/
+/shell/android-studio/.gradle/
+/shell/android-studio/local.properties
+/shell/android-studio/flycast/build/
+/shell/android-studio/flycast/.cxx/

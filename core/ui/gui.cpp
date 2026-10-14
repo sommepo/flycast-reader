@@ -16,6 +16,8 @@
     You should have received a copy of the GNU General Public License
     along with Flycast.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "reader/ui/dc_home.h" // Reader fork
+#include "reader/core/emulator.h" // Reader fork
 #include "gui.h"
 #include "rend/osd.h"
 #include "cfg/cfg.h"
@@ -89,6 +91,11 @@ static bool clearActiveIdNextFrame;
 GameScanner scanner;
 static BackgroundGameLoader gameLoader;
 static Boxart boxart;
+
+// Reader fork: a game's cover and ID, for the Dreamcast-style menu (reader/ui/dc_home.cpp).
+GameBoxart gui_reader_boxart(const GameMedia& game) {
+	return boxart.getBoxartAndLoad(game);
+}
 static Chat chat;
 static std::recursive_mutex guiMutex;
 using LockGuard = std::lock_guard<std::recursive_mutex>;
@@ -632,6 +639,11 @@ static void gui_display_commands()
 		// Settings
 		if (IconButton(ICON_FA_GEAR, T("Settings"), ScaledVec2(buttonWidth, 50)).realize())
 			gui_setState(GuiState::Settings);
+
+		// Reader fork: what the reader offers for the running game (backlog, statistics,
+		// dictionaries, its settings).
+		if (IconButton(ICON_FA_BOOK_OPEN, "Reader", ScaledVec2(buttonWidth, 50)).realize())
+			Reader::Emu::OpenMenu("menu");
 
 		// Exit
 		if (IconButton(ICON_FA_POWER_OFF, commandLineStart ?  T("Exit") : T("Close Game"), ScaledVec2(buttonWidth, 50)).realize())
@@ -1370,7 +1382,11 @@ void gui_display_ui()
 		break;
 	case GuiState::Main:
 		//gui_display_demo();
-		gui_display_content();
+		// Reader fork: the Dreamcast-style menu stands in for the game list.
+		if (ReaderHome::Enabled())
+			ReaderHome::Draw();
+		else
+			gui_display_content();
 		break;
 	case GuiState::Closed:
 		break;

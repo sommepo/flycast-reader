@@ -63,6 +63,9 @@ public:
 	ComPtr<ID3DBlob> getMVVertexShaderBlob();
 	ComPtr<ID3DBlob> getQuadVertexShaderBlob();
 
+	// Reader fork: the CRT picture's pixel shader (reader/render/crt_dx11.cpp)
+	ComPtr<ID3D11PixelShader> compileReaderShader(const char *source) { return compilePS(source, "main", nullptr); }
+
 private:
 	ComPtr<ID3DBlob> compileShader(const char *source, const char* function, const char* profile, const D3D_SHADER_MACRO *pDefines);
 	ComPtr<ID3D11VertexShader> compileVS(const char *source, const char* function, const D3D_SHADER_MACRO *pDefines);

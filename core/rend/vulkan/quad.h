@@ -86,8 +86,10 @@ private:
 class QuadPipeline
 {
 public:
-	QuadPipeline(bool ignoreTexAlpha, bool rotate = false)
-		: rotate(rotate), ignoreTexAlpha(ignoreTexAlpha) {}
+	// Reader fork: with `readerCrt` the pipeline draws with the reader's CRT shader and
+	// takes its 128 bytes of push constants (reader/render/crt_vk.h).
+	QuadPipeline(bool ignoreTexAlpha, bool rotate = false, bool readerCrt = false)
+		: rotate(rotate), ignoreTexAlpha(ignoreTexAlpha), readerCrt(readerCrt) {}
 	void Init(ShaderManager *shaderManager, vk::RenderPass renderPass, int subpass);
 	void Init(const QuadPipeline& other) { Init(other.shaderManager, other.renderPass, other.subpass); }
 	void Term() {
@@ -122,6 +124,7 @@ private:
 	ShaderManager *shaderManager = nullptr;
 	bool rotate;
 	bool ignoreTexAlpha;
+	bool readerCrt; // Reader fork
 };
 
 class QuadDrawer
@@ -134,7 +137,9 @@ public:
 	QuadDrawer& operator=(const QuadDrawer &) = delete;
 
 	void Init(QuadPipeline *pipeline);
-	void Draw(vk::CommandBuffer commandBuffer, vk::ImageView imageView, QuadVertex vertices[4] = nullptr, bool nearestFilter = false, const float *color = nullptr);
+	// Reader fork: `readerCrt`, for a pipeline made with readerCrt, is its 32 push constants
+	void Draw(vk::CommandBuffer commandBuffer, vk::ImageView imageView, QuadVertex vertices[4] = nullptr, bool nearestFilter = false, const float *color = nullptr,
+			const float *readerCrt = nullptr);
 private:
 	QuadPipeline *pipeline = nullptr;
 	std::unique_ptr<QuadBuffer> buffer;

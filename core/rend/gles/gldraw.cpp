@@ -7,6 +7,9 @@
 #include "postprocess.h"
 #include "vmu_xhair.h"
 #endif
+// Reader fork
+#include "reader/core/crt.h"
+#include "reader/render/crt_gl.h"
 
 #include <memory>
 
@@ -769,14 +772,24 @@ bool OpenGLRenderer::renderLastFrame()
 	glcache.Disable(GL_SCISSOR_TEST);
 	getWindowboxDimensions(settings.display.width, settings.display.height, gl.ofbo.aspectRatio, dx, dy, config::Rotate90);
 
-	if (gl.bogusBlitFramebuffer || config::Rotate90)
+	// Reader fork: with the CRT picture on, the frame is drawn as a quad by the reader's
+	// shader, which wants the frame smoothed.
+	const bool readerCrt = Reader::Crt::Enabled();
+	if (gl.bogusBlitFramebuffer || config::Rotate90 || readerCrt)
 	{
 		glViewport(dx, dy, settings.display.width - dx * 2, settings.display.height - dy * 2);
 		glBindFramebuffer(GL_FRAMEBUFFER, gl.ofbo.origFbo);
 		glcache.ClearColor(VO_BORDER_COL.red(), VO_BORDER_COL.green(), VO_BORDER_COL.blue(), 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glcache.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, config::LinearInterpolation ? GL_LINEAR : GL_NEAREST);
-		glcache.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, config::LinearInterpolation ? GL_LINEAR : GL_NEAREST);
+		glcache.BindTexture(GL_TEXTURE_2D, framebuffer->getTexture());
+		glcache.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, config::LinearInterpolation || readerCrt ? GL_LINEAR : GL_NEAREST);
+		glcache.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, config::LinearInterpolation || readerCrt ? GL_LINEAR : GL_NEAREST);
+		ReaderCrtQuad readerQuad { framebuffer->getWidth(), framebuffer->getHeight(),
+			settings.display.width - dx * 2, settings.display.height - dy * 2 };
+		if (config::Rotate90) {
+			std::swap(readerQuad.sourceWidth, readerQuad.sourceHeight);
+			std::swap(readerQuad.outputWidth, readerQuad.outputHeight);
+		}
 		float *vertices = nullptr;
 		if (gl.ofbo.shiftX != 0 || gl.ofbo.shiftY != 0)
 		{
@@ -793,7 +806,7 @@ bool OpenGLRenderer::renderLastFrame()
 			vertices = sverts;
 		}
 		glcache.Disable(GL_BLEND);
-		gl.quadDrawer->draw(framebuffer->getTexture(), config::Rotate90, true, vertices);
+		gl.quadDrawer->draw(framebuffer->getTexture(), config::Rotate90, true, vertices, nullptr, &readerQuad);
 	}
 	else
 	{

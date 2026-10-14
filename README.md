@@ -1,99 +1,85 @@
-# Flycast
+# Flycast Reader
 
-[![Android CI](https://github.com/flyinghead/flycast/actions/workflows/android.yml/badge.svg)](https://github.com/flyinghead/flycast/actions/workflows/android.yml)
-[![C/C++ CI](https://github.com/flyinghead/flycast/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/flyinghead/flycast/actions/workflows/c-cpp.yml)
-[![Nintendo Switch CI](https://github.com/flyinghead/flycast/actions/workflows/switch.yml/badge.svg)](https://github.com/flyinghead/flycast/actions/workflows/switch.yml)
-[![Windows UWP CI](https://github.com/flyinghead/flycast/actions/workflows/uwp.yml/badge.svg)](https://github.com/flyinghead/flycast/actions/workflows/uwp.yml)
-[![BSD CI](https://github.com/flyinghead/flycast/actions/workflows/bsd.yml/badge.svg)](https://github.com/flyinghead/flycast/actions/workflows/bsd.yml)
+Read Japanese Dreamcast games like a visual novel in a browser with Yomitan: point at a word
+in the game's own text and its dictionary entry opens. Make Anki cards, keep a backlog and
+reading statistics.
 
-<img src="shell/linux/flycast.png" alt="flycast logo" width="150"/>
+For Windows and Android.
 
-**Flycast** is a multi-platform Sega Dreamcast, Naomi, Naomi 2, and Atomiswave emulator derived from [**reicast**](https://github.com/skmp/reicast-emulator).
+<table>
+  <tr>
+    <td width="50%"><img src="docs/reader/media/lookup-demo.gif" alt="Pointing at words in サクラ大戦's text"><br><sub>Windows: point at a word</sub></td>
+    <td width="50%"><img src="docs/reader/media/two-screens-demo.gif" alt="The lower screen moves the cursor over words in 北へ。's text"><br><sub>Android, two screens: the lower one is a trackpad</sub></td>
+  </tr>
+</table>
 
-Information about configuration and supported features can be found on [**TheArcadeStriker's flycast wiki**](https://github.com/TheArcadeStriker/flycast-wiki/wiki).
+> A fork of [Flycast](https://github.com/flyinghead/flycast) v2.7. It is not Flycast: please
+> report nothing about it to the Flycast project. Flycast's README is
+> [README.flycast.md](README.flycast.md). The reading layer is AI-written.
 
-Join us on our [**Discord server**](https://discord.gg/X8YWP8w) for a chat.
+## Features
 
-## Downloads ![android](https://flyinghead.github.io/flycast-builds/android.jpg) ![windows](https://flyinghead.github.io/flycast-builds/windows.png) ![linux](https://flyinghead.github.io/flycast-builds/ubuntu.png) ![apple](https://flyinghead.github.io/flycast-builds/apple.png) ![switch](https://flyinghead.github.io/flycast-builds/switch.png) ![xbox](https://flyinghead.github.io/flycast-builds/xbox.png)
+- **Look up words in the game's text.** On a computer, point at a word. On Android, move the
+  cursor onto it with the controller or, on a two-screen handheld, the lower screen as a
+  trackpad. Clicking or touching a word works too. Uses Yomitan dictionaries.
+- **Anki cards** with the sentence and a picture of the scene.
+- **Backlog and reading statistics.**
+- **A Dreamcast-style menu** as the main screen.
+- **CRT picture** (optional, in Reader settings).
 
-Get builds for your system from the [**builds page**](https://flyinghead.github.io/flycast-builds/) or [**GitHub Releases**](https://github.com/flyinghead/flycast/releases).
+<table>
+  <tr>
+    <td width="50%"><img src="docs/reader/media/lookup.png" alt="A dictionary popup over サクラ大戦"><br><sub>A lookup on Windows</sub></td>
+    <td width="50%"><img src="docs/reader/media/one-screen-demo.gif" alt="Touching words in 北へ。's text"><br><sub>Android: touch a word</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/reader/media/two-screens.jpg" alt="A cursor lookup, the lower screen as trackpad"><br><sub>Cursor lookup on Android</sub></td>
+    <td><img src="docs/reader/media/play.jpg" alt="The game list, a book on each readable game"><br><sub>Play: a book marks a supported game</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/reader/media/menu.png" alt="The Dreamcast-style main menu"><br><sub>The main menu</sub></td>
+    <td><img src="docs/reader/media/crt.jpg" alt="北へ。 with the CRT picture on"><br><sub>CRT picture</sub></td>
+  </tr>
+</table>
 
-- **Latest master builds:** regular builds from the `master` branch with recent fixes and updates.
-- **Nightly dev builds:** experimental builds with the latest features and changes.
-- **Stable tagged releases:** versioned release builds published on GitHub Releases.
+## Get it
 
-Automated test results are available from the builds page as well.
+From the [releases](../../releases):
 
-## Install
+- **Windows**: `FlycastReader-<version>-windows.zip`. Unpack it and start `flycast-reader.exe`.
+- **Android**: `FlycastReader-<version>-android.apk` (arm64). Installs beside Flycast.
 
-### Android ![android](https://flyinghead.github.io/flycast-builds/android.jpg)
+You need your own games.
 
-Install Flycast from [**Google Play**](https://play.google.com/store/apps/details?id=com.flycast.emulator).
+## Game scripts
 
-### Flatpak (Linux ![ubuntu logo](https://flyinghead.github.io/flycast-builds/ubuntu.png))
+A game is read through a **game script**: a small Lua file that tells the app where the game
+keeps its text. The apps install them from the list in this repository: **Game Scripts** on
+the menu's Reader page (on Windows also **Reader → Game scripts…**, on Android also in Reader
+settings). New games appear there without an app update. You can also install a script from
+a file.
 
-1. [Set up Flatpak](https://www.flatpak.org/setup/).
+| Game | ID | Reads |
+| --- | --- | --- |
+| シェンムーII | HDR-0164 | Subtitles |
+| What's シェンムー 〜湯川(元)専務をさがせ〜 | 6107179 | Subtitles |
+| セガガガ | HDR-0151 | Message window |
+| レンタヒーロー No.1 | HDR-0074 | Message window, speakers |
+| サクラ大戦 | HDR-0072 | Message window, timed choices |
+| 北へ。White Illumination | T14301M | Message window |
+| 新世紀エヴァンゲリオン 綾波育成計画 | T46303M | Message window |
 
-2. Install Flycast from [Flathub](https://flathub.org/apps/details/org.flycast.Flycast):
+### Writing a script
 
-`flatpak install -y org.flycast.Flycast`
+A script holds addresses and decoding logic only, never text or data from the game.
+[AGENTS.md](AGENTS.md), "Adding a game", explains how a game is run without a display while a
+script is written; each game's notes are in [docs/reader/games](docs/reader/games). Pull
+requests with new scripts are welcome.
 
-3. Run Flycast:
+## Building
 
-`flatpak run org.flycast.Flycast`
+See [AGENTS.md](AGENTS.md).
 
-### Homebrew (macOS ![apple logo](https://flyinghead.github.io/flycast-builds/apple.png))
+## Licence
 
-1. [Set up Homebrew](https://brew.sh).
-
-2. Install Flycast via Homebrew:
-
-`brew install --cask flycast`
-
-### iOS
-
-Due to persistent harassment from an iOS user, support for this platform has been dropped.
-
-### Xbox One/Series ![xbox logo](https://flyinghead.github.io/flycast-builds/xbox.png)
-
-Grab the latest build from [**the builds page**](https://flyinghead.github.io/flycast-builds/), or the [**GitHub Actions**](https://github.com/flyinghead/flycast/actions/workflows/uwp.yml). Then install it using the **Xbox Device Portal**.
-
-## Build from source
-
-### macOS
-
-Right-click the bootstrap script and choose **Open**:
-
-`shell/apple/generate_xcode_project.command`
-
-### Windows
-
-Double-click the bootstrap script:
-
-`shell\windows\generate_vs_project.bat`
-
-### Linux
-
-#### Dependencies
-
-- **C/C++ compiler toolchain** (e.g. `gcc`/`g++`)
-- **CMake**
-- **make**
-- **libcurl** (development headers)
-- **libudev** (development headers)
-- **SDL2** (development headers)
-- **Graphics API**: Vulkan, OpenGL
-
-#### Build
-
-```
-$ git clone --recursive https://github.com/flyinghead/flycast.git
-$ cd flycast
-$ mkdir build && cd build
-$ cmake ..
-$ make
-```
-
-## Packaging status
-
-[![Packaging status](https://repology.org/badge/vertical-allrepos/flycast.svg)](https://repology.org/project/flycast/versions)
+GPL-2.0, as Flycast ([LICENSE](LICENSE)).

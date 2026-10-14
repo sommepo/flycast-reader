@@ -1,3 +1,4 @@
+#include "reader/core/emulator.h" // Reader fork
 #include "audiostream.h"
 #include "cfg/option.h"
 #include "emulator.h"
@@ -55,6 +56,8 @@ void WriteSample(s16 r, s16 l)
 
 	if (++writePtr == SAMPLE_COUNT)
 	{
+		// Reader fork: what the console plays is kept for a card's audio.
+		Reader::Emu::OnAudio(&Buffer[0].l, SAMPLE_COUNT);
 		if (currentBackend != nullptr)
 			currentBackend->push(Buffer, SAMPLE_COUNT, config::LimitFPS);
 		writePtr = 0;

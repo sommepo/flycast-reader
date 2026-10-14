@@ -17,6 +17,9 @@
     along with reicast.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "gui_util.h"
+#ifdef READER_QT
+#include "reader/qt/install.h" // Reader fork
+#endif
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -57,6 +60,24 @@ namespace hostfs
 void select_file_popup(const char *prompt, StringCallback callback,
 		bool selectFile, const std::string& selectExtension)
 {
+#ifdef READER_QT
+	// Reader fork: a folder is chosen in the system's own window where there is one (on
+	// Windows it has the network in it, which the list below has not).
+	if (!selectFile && ImGui::IsPopupOpen(prompt))
+	{
+		std::string chosen;
+		if (ReaderUi::PickFolder(prompt, chosen))
+		{
+			if (ImGui::BeginPopup(prompt))
+			{
+				ImGui::CloseCurrentPopup();
+				ImGui::EndPopup();
+			}
+			callback(chosen.empty(), chosen);
+			return;
+		}
+	}
+#endif
 	fullScreenWindow(true);
 	ImguiStyleVar _(ImGuiStyleVar_WindowRounding, 0);
 	ImguiStyleVar _1(ImGuiStyleVar_FramePadding, ImVec2(4, 3)); // default

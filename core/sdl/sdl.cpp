@@ -1,4 +1,7 @@
 #if defined(USE_SDL)
+#ifdef READER_QT
+#include "reader/qt/install.h" // Reader fork
+#endif
 #include "types.h"
 #include "cfg/cfg.h"
 #include "sdl/sdl.h"
@@ -41,6 +44,11 @@
 
 static SDL_Window* window = NULL;
 static u32 windowFlags;
+
+// Reader fork: the reader's windows lie over this one (reader/qt/host.cpp).
+SDL_Window* sdl_reader_window() {
+	return window;
+}
 
 #define WINDOW_WIDTH  640
 #define WINDOW_HEIGHT  480
@@ -119,7 +127,7 @@ static void setWindowTitleGame()
 		else
 			title = settings.content.title;
 	}
-	SDL_SetWindowTitle(window, ("Flycast - " + title).c_str());
+	SDL_SetWindowTitle(window, ("Flycast Reader - " + title).c_str());
 }
 
 static void captureMouse(bool capture)
@@ -337,6 +345,13 @@ void input_sdl_handle()
 				break;
 
 			case SDL_KEYDOWN:
+#ifdef READER_QT
+				// Reader fork: the reader's own keys (Ctrl with G, T, D or H), which its toolkit
+				// never sees because this window has the keyboard.
+				if (event.type == SDL_KEYDOWN && event.key.repeat == 0 && (event.key.keysym.mod & KMOD_CTRL) != 0
+						&& ReaderUi::Shortcut(event.key.keysym.sym))
+					break;
+#endif
 			case SDL_KEYUP:
 				checkRawInput();
 				if (event.key.repeat == 0)
@@ -491,6 +506,11 @@ void input_sdl_handle()
 				break;
 
 			case SDL_MOUSEMOTION:
+#ifdef READER_QT
+				// Reader fork: a press the reader took is the reader's until it is let go.
+				if (ReaderUi::PointerMove(event.motion.x, event.motion.y))
+					break;
+#endif
 				gui_set_mouse_position(event.motion.x, event.motion.y, false);
 				checkRawInput();
 				if (!config::UseRawInput)
@@ -515,6 +535,13 @@ void input_sdl_handle()
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
 				{
+#ifdef READER_QT
+					// Reader fork: where the game shows text of its own, a click is the reader's.
+					if (event.button.state == SDL_PRESSED
+							? ReaderUi::PointerPress(event.button.x, event.button.y, event.button.button == SDL_BUTTON_LEFT)
+							: ReaderUi::PointerRelease(event.button.x, event.button.y))
+						break;
+#endif
 					Uint8 button;
 					gui_set_mouse_position(event.button.x, event.button.y, false);
 					// Swap middle and right clicks for GUI
@@ -835,7 +862,7 @@ bool sdl_recreate_window(u32 flags)
 	flags |= SDL_WINDOW_FULLSCREEN;
 #endif
 
-	window = SDL_CreateWindow("Flycast", windowPos.x, windowPos.y,
+	window = SDL_CreateWindow("Flycast Reader" /* Reader fork */, windowPos.x, windowPos.y,
 			windowPos.w * hdpiScaling, windowPos.h * hdpiScaling, flags);
 	if (window == nullptr)
 	{
