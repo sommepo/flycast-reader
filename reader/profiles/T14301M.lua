@@ -2,6 +2,8 @@
 -- reader: title 北へ。White Illumination (Kita e. White Illumination)
 -- reader: reads The message window: what is said and told in the story
 -- reader: version T14301M (Japan)
+-- reader: touch press
+-- reader: buttons up down left right a b
 -- Kita e. White Illumination (Hudson, Dreamcast, 1999). docs/reader/games/kita-e.md has what
 -- is read, what is not, and how it was checked.
 --

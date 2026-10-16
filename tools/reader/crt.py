@@ -54,10 +54,10 @@ SIBLINGS = {
         include=("core/reader/", "reader_desktop/", "citra_qt/reader/")),
 }
 FILES = {
-    "core": ["crt.h", "crt.cpp", "crt_jni.h", "crt_shader.glsl", "crt_shader.inc"],
-    "qt": ["reader_crt_page.h", "reader_crt_page.cpp"],
+    "core": ["crt.h", "crt.cpp", "crt_jni.h", "crt_frame.h", "crt_shader.glsl", "crt_shader.inc"],
+    "qt": ["reader_crt_page.h", "reader_crt_page.cpp", "reader_crt_frame.h", "reader_crt_frame.cpp"],
     "tests": ["crt_test.cpp"],
-    "kotlin": ["CrtSettings.kt"],
+    "kotlin": ["CrtSettings.kt", "CrtFrameView.kt"],
 }
 
 FSH_HEAD = """// Reader fork: the CRT picture (reader/core/crt.h) as one of this emulator's post-processing

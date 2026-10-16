@@ -72,7 +72,7 @@
         app:iconSpaceReserved="false" />
     <ListPreference
         app:key="reader_advance_button"
-        app:defaultValue="13"
+        app:defaultValue="2"
         app:entries="@array/reader_advance_button_entries"
         app:entryValues="@array/reader_advance_button_values"
         app:title="@string/reader_pref_advance_button"

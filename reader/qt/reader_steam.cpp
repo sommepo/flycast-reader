@@ -78,6 +78,11 @@ public:
         if (!Attach()) {
             return;
         }
+        // The virtual gamepad's triggers are whole axes: at rest -32768, not 0. Given 0 at
+        // rest, an emulator saw both triggers half pulled (Kita e's title took no Start).
+        if (axis == Bridge::LeftTrigger || axis == Bridge::RightTrigger) {
+            value = std::clamp(value, 0, 32767) * 2 - 32768;
+        }
         SDL_LockJoysticks();
 #if READER_STEAM_SDL3
         SDL_SetJoystickVirtualAxis(joystick, static_cast<int>(axis), static_cast<Sint16>(value));

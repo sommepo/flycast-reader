@@ -19,6 +19,11 @@ import com.flycast.emulator.reader.cursor.HoverCursor
 object ReaderInput {
     /** The A button's bit in the Dreamcast's button word: "yes" on the console. */
     const val DC_A = 2
+    const val DC_B = 1
+    const val DC_UP = 4
+    const val DC_DOWN = 5
+    const val DC_LEFT = 6
+    const val DC_RIGHT = 7
 
     /** The button that pauses and resumes the statistics, or -1. */
     @Volatile

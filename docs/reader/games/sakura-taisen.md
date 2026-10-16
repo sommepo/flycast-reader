@@ -37,6 +37,21 @@ Profile: `reader/profiles/HDR-0072.lua`.
   to fit 404; with two answers they are 60 apart and with three 45, about y = 196 (the rule
   in the profile, 180 / (answers + 1), fits those two and is a guess for any other number).
 
+## Played by touch
+
+With *Play by touch* (Reader settings on Android, on unless switched off) the game is played by
+touch alone (`-- reader: touch press`): a tap beside the text presses A, a tap on an answer of
+a timed choice moves the cursor to it with the d-pad and presses A. The answers are reported
+as a choice now (the `choice` channel), not as dialogue. The cursor is the word at `+0x64` of
+the choice's object (the pointer at `+4` of its record), 0 on the first answer: found on
+2026-10-16 on Linux without a display, by moving the cursor at a choice of three answers and
+comparing memory. Checked there: the profile said 0, 1, 2, 1 as the cursor went down, down
+and up; the app's presses for a tap on the first answer (A) and on the third (down, down, A)
+led to different replies, each the one its answer asks for. The timer runs while the cursor
+moves, so a pick is a few presses quicker than the time a choice gives. In the desktop app too (2026-10-16, by clicks over the development channel): a click beside a
+message went on to the choice, a click on the third answer picked it (its reply came). Not
+checked: a choice of four answers, a choice with a gauge, a device, Windows.
+
 ## How it was checked
 
 On Linux without a display (the game drawn in software), disc 1 from "ディスク1の最初から",

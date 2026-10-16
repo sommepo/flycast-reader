@@ -2,6 +2,7 @@
 -- reader: title サクラ大戦 (Sakura Taisen)
 -- reader: reads The message window and the answers of a timed choice (LIPS)
 -- reader: version HDR-0072 (Japan), both discs
+-- reader: touch press
 -- Sakura Taisen (Sega, Dreamcast, 2000). docs/reader/games/sakura-taisen.md has what is read,
 -- what is not, and how it was checked.
 --
@@ -20,6 +21,7 @@ local START, POS, BUSY = 0x74, 0x78, 0x6C
 
 local CHOICE = 0x8C1F7AD4     -- the timed choice
 local CHOICE_OBJECT, CHOICE_TEXT, CHOICE_STEP, CHOICE_COUNT = 0x04, 0x0C, 0x64, 0x138
+local CURSOR = 0x64 -- in the choice's object: the answer the cursor is on, from 0
 
 -- The message window's grid, in the 640x480 picture.
 local LEFT, TOP, CELL, PITCH, HEIGHT = 128, 338, 30, 32, 30
@@ -107,10 +109,15 @@ end
 
 local function choice()
     local count = mem.u32(CHOICE + CHOICE_COUNT)
-    if not ram(mem.u32(CHOICE + CHOICE_OBJECT)) or not count or count < 1 or count > 5 then
+    local object = mem.u32(CHOICE + CHOICE_OBJECT)
+    if not ram(object) or not count or count < 1 or count > 5 then
         withdraw("choice"); last_choice = nil
+        reader.cursor(nil)
         return
     end
+    -- Which answer the cursor is on: what a tap on an answer is turned into presses with.
+    local at = mem.u32(object + CURSOR)
+    if at and at < count then reader.cursor(at) else reader.cursor(nil) end
     local answers, key = {}, {}
     for n = 0, count - 1 do
         local raw = mem.read(CHOICE + CHOICE_TEXT + n * CHOICE_STEP, CHOICE_STEP)
@@ -138,7 +145,7 @@ local function choice()
         end
     end
     reader.emit{ text = decode(table.concat(chars)), speaker = "", window = "choice",
-                 id = "choice:" .. text.hash(key) }
+                 channel = "choice", id = "choice:" .. text.hash(key) }
     reader.layout("choice", { space = { 640, 480 }, box = { 64, 100, 512, 180 }, glyphs = cells })
     shown.choice = true
 end
@@ -150,5 +157,6 @@ end)
 
 reader.on_state_loaded(function()
     withdraw("message"); withdraw("choice")
+    reader.cursor(nil)
     last_start, fresh, last_choice = nil, true, nil
 end)

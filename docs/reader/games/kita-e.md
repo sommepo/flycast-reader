@@ -50,6 +50,12 @@ By the program's addresses:
 - Measured in pictures: 24 pixels to a full-width character from x = 20, rows 27 apart
   from y = 370.
 
+## Played by touch
+
+With *Play by touch* (Reader settings on Android) a tap beside the text presses A
+(`-- reader: touch press`). Its choices are not read, so they are made with the controller.
+Not tried in the game.
+
 ## How it was checked
 
 On Linux without a display (the game drawn in software), a new game, 2026-10-10: the first
@@ -60,3 +66,13 @@ again **after a new start of the emulator**, with another name: the same address
 **Not looked at**: anything later (other scenes load other scripts: that the pointer at
 `0x00040548` follows them was not seen), a loaded save, what `@n@` and the numbered commands
 do, whether the game is the system's entry 7 in every way of starting it.
+
+## Tapping an answer (2026-10-16)
+
+Looked for, for playing by touch on a phone, and not done. The named objects are a list from
+`0x00032D0C` (the next entry's pointer first): MessageOut, MenuSelect, 3CUTVISUAL. At the
+fortune-telling call (はい / いいえ side by side on the phone) nothing in MenuSelect's object or
+what it points at changes with the highlight; the only byte that follows it in the program's
+memory is at `0x00800210`, on the heap. The command menu after it is a row of pictures (book,
+PHS, bag, return), chosen with left and right. Neither has text a tap could pick, so the script
+keeps its buttons (up, down, left, right, A, B). Tried on Linux, drawn in software.

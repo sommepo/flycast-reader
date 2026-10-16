@@ -19,8 +19,8 @@
       "version": "HDR-0072 (Japan), both discs",
       "api": 1,
       "file": "HDR-0072.lua",
-      "size": 6027,
-      "sha256": "f9fee034c44b7dc5b3e555682fec060735cf750b9ffb43d2b6ca07c2ec008d39"
+      "size": 6436,
+      "sha256": "dd4569986fbcfe2ae60939690f7560d75941e1f2c60532fa3afab53d5f62ee29"
     },
     {
       "id": "HDR-0074",
@@ -59,8 +59,8 @@
       "version": "T14301M (Japan)",
       "api": 1,
       "file": "T14301M.lua",
-      "size": 6059,
-      "sha256": "1cb4db47a1bd38b03bc5a857033b3fb199898a0f7a480edb1a39dc942e004195"
+      "size": 6124,
+      "sha256": "78e6d8139c19e8318e2a066b58564e07746f2b297332cf816b45bb1b1f597748"
     },
     {
       "id": "T46303M",

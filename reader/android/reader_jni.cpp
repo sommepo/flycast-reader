@@ -384,6 +384,21 @@ JNIEXPORT void JNICALL Java_com_flycast_emulator_reader_ReaderNative_pressButton
 	}
 }
 
+/// Which answer of the choice on screen the game's cursor is on, as the profile reports it:
+/// {index (-1 for none yet), 1 when the answers are side by side}, or null when it says nothing.
+JNIEXPORT jintArray JNICALL Java_com_flycast_emulator_reader_ReaderNative_answerCursor(JNIEnv *env, jobject) {
+    const auto cursor = Reader::Engine::Instance().Cursor();
+    if (!cursor) {
+        return nullptr;
+    }
+    const jint values[2]{cursor->index, cursor->horizontal ? 1 : 0};
+    const jintArray array = env->NewIntArray(2);
+    if (array) {
+        env->SetIntArrayRegion(array, 0, 2, values);
+    }
+    return array;
+}
+
 JNIEXPORT jboolean JNICALL Java_com_flycast_emulator_reader_ReaderNative_inGame(JNIEnv *, jobject) {
 	return emu.running() && !gui_is_open() ? JNI_TRUE : JNI_FALSE;
 }

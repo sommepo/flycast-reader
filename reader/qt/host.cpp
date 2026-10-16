@@ -444,7 +444,11 @@ void BindToWindow() {
 /// the game, and these take the same way from there.
 class ShadowWindow final : public QMainWindow {
 public:
-    using QMainWindow::QMainWindow;
+    ShadowWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
+        // A move with no button held reaches mouseMoveEvent only so (the channel's `move`, which
+        // is how the README's demos point at words).
+        setMouseTracking(true);
+    }
 
 protected:
     void mousePressEvent(QMouseEvent* event) override {
